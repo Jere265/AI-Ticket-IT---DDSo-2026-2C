@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+
+# Builds
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React Native / Metro
+__tests__/
+*.local
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Distribution
+dist/
+build/
