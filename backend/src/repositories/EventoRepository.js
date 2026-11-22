@@ -29,7 +29,10 @@ export class EventoRepository extends BaseRepository {
    * @returns {Evento[]}
    */
   buscarPorCategoria(categoria) {
-    return this.listarTodos().filter(e => e.categoria === categoria);
+    if (!categoria) return [];
+    const clean = str => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const cat = clean(categoria);
+    return this.listarTodos().filter(e => clean(e.categoria) === cat);
   }
 }
 

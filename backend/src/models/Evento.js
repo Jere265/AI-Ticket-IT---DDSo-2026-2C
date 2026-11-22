@@ -201,11 +201,12 @@ export class Evento extends Entidad {
    */
   coincideConBusqueda(criterio) {
     if (!criterio || criterio.trim().length === 0) return true;
-    const c = criterio.toLowerCase().trim();
+    const clean = str => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const c = clean(criterio);
     return (
-      this.nombre.toLowerCase().includes(c) ||
-      this.descripcion.toLowerCase().includes(c) ||
-      this.categoria.toLowerCase().includes(c)
+      clean(this.nombre).includes(c) ||
+      clean(this.descripcion).includes(c) ||
+      clean(this.categoria).includes(c)
     );
   }
 
