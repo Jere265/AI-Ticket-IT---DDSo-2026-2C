@@ -1,21 +1,22 @@
-import { Entidad } from './Entidad.js';
+import { Usuario } from './Usuario.js';
 
 /**
  * Entidad Comprador.
  * Representa al usuario que navega eventos y adquiere entradas.
+ * Extiende de Usuario según el modelo conceptual (Usuario con rol de comprador).
  * Reglas de negocio asociadas: BR-04 (compra de entradas), BR-06 (visualización de compras).
  */
-export class Comprador extends Entidad {
+export class Comprador extends Usuario {
   /**
    * @param {Object} data
    * @param {string} data.nombre - Nombre del comprador
+   * @param {string} [data.apellido] - Apellido del comprador
    * @param {string} data.email - Correo electrónico del comprador
+   * @param {Array} [data.favoritos] - Eventos favoritos
    * @param {string|number} [data.id] - Identificador único (opcional)
    */
   constructor(data = {}) {
     super(data);
-    this.nombre = data.nombre || '';
-    this.email = data.email || '';
   }
 
   /**
@@ -41,33 +42,18 @@ export class Comprador extends Entidad {
     };
   }
 
-  /**
-   * Valida formato básico de email.
-   * @private
-   */
-  _emailValido(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  }
-
-  /**
-   * Actualiza los datos del comprador.
-   * @param {Object} datos
-   */
-  actualizar(datos = {}) {
-    if (datos.nombre !== undefined) this.nombre = datos.nombre;
-    if (datos.email !== undefined) this.email = datos.email;
-    this.tocar();
-  }
-
   toJSON() {
-    return {
+    const json = {
       id: this.id,
       nombre: this.nombre,
       email: this.email,
       fechaCreacion: this.fechaCreacion,
       fechaActualizacion: this.fechaActualizacion
     };
+    if (this.apellido) json.apellido = this.apellido;
+    if (this.favoritos && this.favoritos.length > 0) {
+      json.favoritos = this.favoritos.map(f => (typeof f === 'object' && f !== null ? f.id || f : f));
+    }
+    return json;
   }
 }
-

@@ -1,8 +1,10 @@
 /**
  * Enumeración de estados posibles de una Compra.
- * Regla de negocio BR-05: Toda compra debe encontrarse en uno de los estados definidos.
+ * Según el modelo conceptual del enunciado y reglas de negocio BR-05.
+ * Incluye tanto PENDIENTE (diagrama tentativo) como PENDIENTE_PAGO (descripción narrativa).
  */
 export const EstadoCompra = {
+  PENDIENTE: 'PENDIENTE',
   PENDIENTE_PAGO: 'PENDIENTE_PAGO',
   CONFIRMADA: 'CONFIRMADA',
   UTILIZADA: 'UTILIZADA',
@@ -20,11 +22,12 @@ EstadoCompra.esValido = function (estado) {
 };
 
 /**
- * Devuelve la lista de todos los estados válidos (solo valores de cadena).
+ * Devuelve la lista de todos los estados válidos.
  * @returns {string[]}
  */
 EstadoCompra.listarTodos = function () {
   return [
+    EstadoCompra.PENDIENTE,
     EstadoCompra.PENDIENTE_PAGO,
     EstadoCompra.CONFIRMADA,
     EstadoCompra.UTILIZADA,
@@ -32,4 +35,3 @@ EstadoCompra.listarTodos = function () {
     EstadoCompra.REEMBOLSADA
   ];
 };
-

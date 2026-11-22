@@ -3,9 +3,12 @@ import { CompradorRepository } from '../repositories/CompradorRepository.js';
 
 /**
  * Servicio de Compradores.
- * Casos de uso: registro y consulta de compradores.
+ * Casos de uso: registro, consulta y gestión de eventos favoritos del comprador.
  */
 export class CompradorService {
+  /**
+   * @param {CompradorRepository} [repositorio]
+   */
   constructor(repositorio = null) {
     this._repositorio = repositorio || new CompradorRepository();
   }
@@ -60,5 +63,57 @@ export class CompradorService {
   listarTodos() {
     return this._repositorio.listarTodos();
   }
-}
 
+  /**
+   * Agrega un evento a los favoritos del comprador.
+   * Requerimiento conceptual: "guardar eventos favoritos".
+   * @param {number|string} compradorId
+   * @param {number|string|Object} evento
+   * @returns {Object} { exito: boolean, comprador?: Comprador, error?: string }
+   */
+  agregarFavorito(compradorId, evento) {
+    const comprador = this.buscarPorId(compradorId);
+    if (!comprador) {
+      return { exito: false, error: 'Comprador no encontrado.' };
+    }
+
+    const agregado = comprador.agregarFavorito(evento);
+    if (!agregado) {
+      return { exito: false, error: 'El evento ya se encuentra en favoritos.' };
+    }
+
+    this._repositorio.guardar(comprador);
+    return { exito: true, comprador };
+  }
+
+  /**
+   * Remueve un evento de los favoritos del comprador.
+   * @param {number|string} compradorId
+   * @param {number|string|Object} evento
+   * @returns {Object} { exito: boolean, comprador?: Comprador, error?: string }
+   */
+  removerFavorito(compradorId, evento) {
+    const comprador = this.buscarPorId(compradorId);
+    if (!comprador) {
+      return { exito: false, error: 'Comprador no encontrado.' };
+    }
+
+    const removido = comprador.removerFavorito(evento);
+    if (!removido) {
+      return { exito: false, error: 'El evento no estaba en la lista de favoritos.' };
+    }
+
+    this._repositorio.guardar(comprador);
+    return { exito: true, comprador };
+  }
+
+  /**
+   * Obtiene la lista de favoritos de un comprador.
+   * @param {number|string} compradorId
+   * @returns {Array}
+   */
+  obtenerFavoritos(compradorId) {
+    const comprador = this.buscarPorId(compradorId);
+    return comprador ? comprador.favoritos : [];
+  }
+}

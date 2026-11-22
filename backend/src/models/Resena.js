@@ -1,35 +1,71 @@
 import { Entidad } from './Entidad.js';
 
 /**
- * Entidad Resena.
+ * Entidad Resena (o Resenia según diagrama).
  * Representa la valoración realizada por un comprador sobre un evento.
- * Reglas de negocio asociadas: BR-13 (generación), BR-14 (contenido), BR-15 (visualización).
+ * Según el modelo conceptual del enunciado y reglas BR-13, BR-14 y BR-15.
  */
 export class Resena extends Entidad {
   /**
    * @param {Object} data
    * @param {string|number} data.compraId - ID de la compra asociada
-   * @param {string|number} data.eventoId - ID del evento valorado
-   * @param {string|number} data.compradorId - ID del comprador que califica
-   * @param {number} data.puntaje - Puntaje numérico (1-5)
-   * @param {string} data.comentario - Comentario escrito
-   * @param {string|Date} [data.fecha] - Fecha de la resena (por defecto ahora)
-   * @param {string|number} [data.id] - Identificador único (opcional)
+   * @param {string|number|Object} [data.evento] - Evento valorado
+   * @param {string|number} [data.eventoId] - ID del evento valorado
+   * @param {string|number|Object} [data.comprador] - Usuario comprador que califica
+   * @param {string|number} [data.compradorId] - ID del comprador
+   * @param {number} [data.puntuacion] - Puntuación numérica (diagrama tentativo)
+   * @param {number} [data.puntaje] - Puntaje numérico (alias de puntuación)
+   * @param {string} [data.detalle] - Detalle escrito (diagrama tentativo)
+   * @param {string} [data.comentario] - Comentario escrito (alias de detalle)
+   * @param {string|Date} [data.fecha] - Fecha de la reseña
+   * @param {string|number} [data.id] - Identificador único
    */
   constructor(data = {}) {
     super(data);
     this.compraId = data.compraId || null;
-    this.eventoId = data.eventoId || null;
-    this.compradorId = data.compradorId || null;
-    this.puntaje = data.puntaje || 0;
-    this.comentario = data.comentario || '';
+
+    this.evento = (typeof data.evento === 'object' && data.evento !== null) ? data.evento : null;
+    this.eventoId = data.eventoId || (this.evento ? this.evento.id : (typeof data.evento === 'string' || typeof data.evento === 'number' ? data.evento : null));
+
+    this.comprador = (typeof data.comprador === 'object' && data.comprador !== null) ? data.comprador : null;
+    this.compradorId = data.compradorId || (this.comprador ? this.comprador.id : (typeof data.comprador === 'string' || typeof data.comprador === 'number' ? data.comprador : null));
+
+    this._puntaje = data.puntuacion !== undefined ? Number(data.puntuacion) : (data.puntaje !== undefined ? Number(data.puntaje) : 0);
+    this._comentario = data.detalle !== undefined ? data.detalle : (data.comentario || '');
     this.fecha = data.fecha ? new Date(data.fecha) : new Date();
   }
 
+  get puntuacion() {
+    return this._puntaje;
+  }
+  set puntuacion(val) {
+    this._puntaje = Number(val) || 0;
+  }
+
+  get puntaje() {
+    return this._puntaje;
+  }
+  set puntaje(val) {
+    this._puntaje = Number(val) || 0;
+  }
+
+  get detalle() {
+    return this._comentario;
+  }
+  set detalle(val) {
+    this._comentario = val || '';
+  }
+
+  get comentario() {
+    return this._comentario;
+  }
+  set comentario(val) {
+    this._comentario = val || '';
+  }
+
   /**
-   * Valida que los datos de la resena sean correctos.
-   * Regla de negocio BR-13: Solo puede emitirse una resena si la compra está UTILIZADA.
-   * Regla de negocio BR-14: Toda resena debe contener puntaje y comentario.
+   * Valida que los datos de la reseña sean correctos.
+   * Reglas de negocio BR-13, BR-14.
    * @returns {Object} { valido: boolean, errores: string[] }
    */
   validar() {
@@ -47,11 +83,11 @@ export class Resena extends Entidad {
       errores.push('La resena debe tener un comprador asignado.');
     }
 
-    if (!this.puntaje || this.puntaje < 1 || this.puntaje > 5) {
+    if (!this._puntaje || this._puntaje < 1 || this._puntaje > 5) {
       errores.push('El puntaje debe ser un número entre 1 y 5.');
     }
 
-    if (!this.comentario || this.comentario.trim().length === 0) {
+    if (!this._comentario || this._comentario.trim().length === 0) {
       errores.push('El comentario de la resena es obligatorio.');
     }
 
@@ -62,7 +98,7 @@ export class Resena extends Entidad {
   }
 
   /**
-   * Actualiza el puntaje y comentario de la resena.
+   * Actualiza el puntaje y comentario de la reseña.
    * @param {number} puntaje
    * @param {string} comentario
    * @returns {Object} { exito: boolean, error?: string }
@@ -82,8 +118,8 @@ export class Resena extends Entidad {
       };
     }
 
-    this.puntaje = puntaje;
-    this.comentario = comentario;
+    this._puntaje = puntaje;
+    this._comentario = comentario;
     this.tocar();
     return { exito: true };
   }
@@ -95,7 +131,9 @@ export class Resena extends Entidad {
       eventoId: this.eventoId,
       compradorId: this.compradorId,
       puntaje: this.puntaje,
+      puntuacion: this.puntuacion,
       comentario: this.comentario,
+      detalle: this.detalle,
       fecha: this.fecha.toISOString(),
       fechaCreacion: this.fechaCreacion,
       fechaActualizacion: this.fechaActualizacion
@@ -103,4 +141,5 @@ export class Resena extends Entidad {
   }
 }
 
-
+// Exportamos también el alias con la ortografía del diagrama
+export const Resenia = Resena;

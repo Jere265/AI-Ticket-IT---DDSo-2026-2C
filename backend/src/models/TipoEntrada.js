@@ -3,15 +3,17 @@ import { Entidad } from './Entidad.js';
 /**
  * Entidad TipoEntrada.
  * Representa una modalidad de acceso a un evento (ej. General, Platea, VIP).
- * Reglas de negocio asociadas: BR-02 (tipos de entrada), BR-03 (disponibilidad).
+ * Según el modelo conceptual del enunciado y reglas BR-02 y BR-03.
  */
 export class TipoEntrada extends Entidad {
   /**
    * @param {Object} data
    * @param {string|number} data.eventoId - ID del evento al que pertenece
    * @param {string} data.nombre - Nombre del tipo de entrada
+   * @param {string} [data.descripcion] - Descripción del tipo de entrada
    * @param {number} data.precio - Precio por entrada
-   * @param {number} data.cupoTotal - Cupo total de entradas disponibles
+   * @param {number} [data.cupo] - Cupo total (alias de cupoTotal)
+   * @param {number} [data.cupoTotal] - Cupo total de entradas disponibles
    * @param {number} [data.cupoDisponible] - Cupo disponible (por defecto igual a cupoTotal)
    * @param {string|number} [data.id] - Identificador único (opcional)
    */
@@ -19,9 +21,20 @@ export class TipoEntrada extends Entidad {
     super(data);
     this.eventoId = data.eventoId || null;
     this.nombre = data.nombre || '';
-    this.precio = data.precio || 0;
-    this.cupoTotal = data.cupoTotal || 0;
-    this.cupoDisponible = data.cupoDisponible !== undefined ? data.cupoDisponible : data.cupoTotal || 0;
+    this.descripcion = data.descripcion || '';
+    this.precio = data.precio !== undefined ? Number(data.precio) : 0;
+    const cupoInicial = data.cupoTotal !== undefined ? data.cupoTotal : (data.cupo !== undefined ? data.cupo : 0);
+    this.cupoTotal = cupoInicial;
+    this.cupoDisponible = data.cupoDisponible !== undefined ? data.cupoDisponible : cupoInicial;
+  }
+
+  get cupo() {
+    return this.cupoDisponible;
+  }
+
+  set cupo(valor) {
+    this.cupoTotal = valor;
+    this.cupoDisponible = valor;
   }
 
   /**
@@ -39,7 +52,7 @@ export class TipoEntrada extends Entidad {
       errores.push('El nombre del tipo de entrada es obligatorio.');
     }
 
-    if (!this.precio || this.precio < 0) {
+    if (this.precio === undefined || this.precio === null || this.precio < 0) {
       errores.push('El precio debe ser un número mayor o igual a cero.');
     }
 
@@ -59,6 +72,16 @@ export class TipoEntrada extends Entidad {
       valido: errores.length === 0,
       errores
     };
+  }
+
+  /**
+   * Verifica si hay cupo disponible para la cantidad solicitada.
+   * Método según diagrama del enunciado.
+   * @param {number} cantidad
+   * @returns {boolean}
+   */
+  hayCupoPara(cantidad) {
+    return this.tieneDisponibilidad(cantidad);
   }
 
   /**
@@ -110,8 +133,13 @@ export class TipoEntrada extends Entidad {
    */
   actualizar(datos = {}) {
     if (datos.nombre !== undefined) this.nombre = datos.nombre;
-    if (datos.precio !== undefined) this.precio = datos.precio;
+    if (datos.descripcion !== undefined) this.descripcion = datos.descripcion;
+    if (datos.precio !== undefined) this.precio = Number(datos.precio);
     if (datos.cupoTotal !== undefined) this.cupoTotal = datos.cupoTotal;
+    if (datos.cupo !== undefined) {
+      this.cupoTotal = datos.cupo;
+      this.cupoDisponible = datos.cupo;
+    }
     this.tocar();
   }
 
@@ -120,12 +148,13 @@ export class TipoEntrada extends Entidad {
       id: this.id,
       eventoId: this.eventoId,
       nombre: this.nombre,
+      descripcion: this.descripcion,
       precio: this.precio,
       cupoTotal: this.cupoTotal,
       cupoDisponible: this.cupoDisponible,
+      cupo: this.cupoDisponible,
       fechaCreacion: this.fechaCreacion,
       fechaActualizacion: this.fechaActualizacion
     };
   }
 }
-
